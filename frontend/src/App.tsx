@@ -3,6 +3,7 @@ import Home from './pages/Home'
 import EventDetail from './pages/EventDetail'
 import CreateEvent from './pages/CreateEvent'
 import Login from './pages/Login'
+import Admin from './pages/Admin'
 import Layout from './components/Layout'
 
 function App() {
@@ -13,9 +14,11 @@ function App() {
                 <Route path="events/:id" element={<EventDetail />} />
                 <Route path="events/create" element={<CreateEvent />} />
                 <Route path="login" element={<Login />} />
+                <Route path="admin" element={<Admin />} />
             </Route>
         </Routes>
     )
 }
 
 export default App
+
