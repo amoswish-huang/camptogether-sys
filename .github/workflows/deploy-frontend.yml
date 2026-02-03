@@ -8,7 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_ID: camptogether
+  # Frontend is hosted on gooddaybnb-99788 Firebase project
+  FIREBASE_PROJECT_ID: gooddaybnb-99788
 
 jobs:
   build-and-deploy:
@@ -34,13 +35,15 @@ jobs:
           cd frontend
           npm run build
         env:
-          VITE_API_URL: https://camptogether-api-495298982618.asia-east1.run.app
+          VITE_API_URL: https://camptogether-api-1031653538314.asia-east1.run.app
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
-          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_CAMPTOGETHER }}
-          projectId: ${{ env.PROJECT_ID }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GOODDAYBNB }}
+          projectId: ${{ env.FIREBASE_PROJECT_ID }}
+          target: camptogether
           entryPoint: frontend
           channelId: live
+
