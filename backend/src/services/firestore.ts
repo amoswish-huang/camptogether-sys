@@ -1,6 +1,6 @@
 import { Firestore } from '@google-cloud/firestore';
 
-const projectId = process.env.GCP_PROJECT_ID || 'camptogether';
+const projectId = process.env.FIREBASE_PROJECT_ID || process.env.GCP_PROJECT_ID || 'camptogether';
 
 let db: Firestore | null = null;
 

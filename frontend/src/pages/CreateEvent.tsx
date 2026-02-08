@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function CreateEvent() {
     const navigate = useNavigate()
-    const [loading, setLoading] = useState(false)
+    const { user, loading } = useAuth()
+    const [submitting, setSubmitting] = useState(false)
     const [form, setForm] = useState({
         title: '',
         description: '',
@@ -15,6 +17,12 @@ export default function CreateEvent() {
         is_public: false,
     })
 
+    useEffect(() => {
+        if (!loading && !user) {
+            navigate('/login')
+        }
+    }, [loading, user, navigate])
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!form.title || !form.start_date || !form.end_date) {
@@ -22,17 +30,16 @@ export default function CreateEvent() {
             return
         }
 
-        setLoading(true)
+        setSubmitting(true)
         try {
             const event = await api.createEvent({
                 ...form,
-                host_id: 1, // TODO: Get from auth context
             })
             navigate(`/events/${event.id}`)
         } catch (err) {
             alert('建立失敗，請稍後再試')
         } finally {
-            setLoading(false)
+            setSubmitting(false)
         }
     }
 
@@ -128,10 +135,12 @@ export default function CreateEvent() {
                 </div>
 
                 <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
-                    <button type="submit" className="btn btn-primary" disabled={loading}>
-                        {loading ? '建立中...' : '🎯 建立活動'}
+                    <button type="submit" className="btn btn-primary" disabled={submitting}>
+                        {submitting ? '建立中...' : '🎯 建立活動'}
                     </button>
-                    <button type="button" className="btn btn-secondary" onClick={() => navigate('/')}>
+                    <button type="button" className="btn btn-secondary" onClick={() => navigate('/')}
+                        disabled={submitting}
+                    >
                         取消
                     </button>
                 </div>

@@ -1,18 +1,21 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import api, { Event } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 
 export default function Home() {
+    const { user } = useAuth()
     const [events, setEvents] = useState<Event[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
 
     useEffect(() => {
+        setLoading(true)
         api.getEvents()
-            .then(setEvents)
+            .then(data => setEvents(data.items))
             .catch(err => setError(err.message))
             .finally(() => setLoading(false))
-    }, [])
+    }, [user])
 
     const formatDate = (dateStr: string) => {
         if (!dateStr) return ''

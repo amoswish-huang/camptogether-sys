@@ -1,35 +1,59 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import api, { Event, ChecklistItem, Expense } from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
 
 type Tab = 'info' | 'gear' | 'food' | 'expense'
 
 export default function EventDetail() {
     const { id } = useParams<{ id: string }>()
+    const navigate = useNavigate()
+    const { user } = useAuth()
     const [event, setEvent] = useState<Event | null>(null)
     const [checklist, setChecklist] = useState<ChecklistItem[]>([])
     const [expenses, setExpenses] = useState<Expense[]>([])
+    const [detailError, setDetailError] = useState('')
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState<Tab>('info')
 
     useEffect(() => {
         if (!id) return
 
-        Promise.all([
-            api.getEvent(id),
-            api.getChecklist(id),
-            api.getExpenses(id),
-        ])
-            .then(([eventData, checklistData, expenseData]) => {
+        const load = async () => {
+            setLoading(true)
+            try {
+                const eventData = await api.getEvent(id)
                 setEvent(eventData)
-                setChecklist(checklistData)
-                setExpenses(expenseData)
-            })
-            .finally(() => setLoading(false))
-    }, [id])
+
+                if (user) {
+                    try {
+                        const [checklistData, expenseData] = await Promise.all([
+                            api.getChecklist(id),
+                            api.getExpenses(id),
+                        ])
+                        setChecklist(checklistData)
+                        setExpenses(expenseData)
+                        setDetailError('')
+                    } catch (error) {
+                        console.error('Failed to load private data', error)
+                        setChecklist([])
+                        setExpenses([])
+                        setDetailError('無法載入清單與費用，請確認是否加入活動。')
+                    }
+                } else {
+                    setChecklist([])
+                    setExpenses([])
+                }
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        load()
+    }, [id, user])
 
     const toggleItem = async (itemId: string) => {
-        if (!id) return
+        if (!id || !user) return
         await api.toggleChecklistItem(id, itemId)
         setChecklist(prev => prev.map(item =>
             item.id === itemId ? { ...item, is_checked: !item.is_checked } : item
@@ -79,6 +103,21 @@ export default function EventDetail() {
                     <span>👥 {event.attendee_ids?.length || 0} 人參加</span>
                 </div>
             </div>
+
+            {!user && (
+                <div className="card" style={{ marginBottom: 20 }}>
+                    <p>登入後可查看裝備清單、食材與費用分攤。</p>
+                    <button className="btn btn-primary" onClick={() => navigate('/login')}>
+                        前往登入
+                    </button>
+                </div>
+            )}
+
+            {user && detailError && (
+                <div className="card" style={{ marginBottom: 20, color: 'var(--color-error)' }}>
+                    {detailError}
+                </div>
+            )}
 
             <div className="tabs">
                 <button className={`tab ${activeTab === 'info' ? 'active' : ''}`} onClick={() => setActiveTab('info')}>

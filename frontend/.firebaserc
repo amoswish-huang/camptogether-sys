@@ -1,7 +1,9 @@
 {
-  "projects": {},
+  "projects": {
+    "default": "camptogether"
+  },
   "targets": {
-    "gooddaybnb-99788": {
+    "camptogether": {
       "hosting": {
         "camptogether": [
           "camptogether"

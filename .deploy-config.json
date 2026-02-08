@@ -14,7 +14,7 @@
         }
     },
     "firebase": {
-        "project": "gooddaybnb-99788",
+        "project": "camptogether",
         "hostingSite": "camptogether",
         "hostingUrl": "https://camptogether.web.app"
     }
